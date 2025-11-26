@@ -1,0 +1,66 @@
+From 164bf5cb68c06a779c8982f3d58957dca4433c09 Mon Sep 17 00:00:00 2001
+From: Viktor Rosendahl <viktor.rosendahl@unikie.com>
+Date: Thu, 7 Mar 2024 11:20:22 +0200
+Subject: [PATCH 0001/1764] HACK: cpu_pm: work around non-working cpudile for
+ EL1
+
+This is a super ugly hack that works around the fact that cpudile doesn't
+seem to work when pkvm is enabled. This is probably due to the fact that
+cpudile doesn't for some reason work with nVHE mode. So the workaround is
+to register a notifier that checks if current level is el1, if it is, it
+is proof that we are in nVHE mode and we return -EBUSY, preventing the
+system from entering idle.
+
+This hack is NOT for production use.
+
+Signed-off-by: Viktor Rosendahl <viktor.rosendahl@unikie.com>
+---
+ kernel/cpu_pm.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/kernel/cpu_pm.c b/kernel/cpu_pm.c
+index 246efc74e3f3..6aeb18a47ec7 100644
+--- a/kernel/cpu_pm.c
++++ b/kernel/cpu_pm.c
+@@ -6,6 +6,9 @@
+  *	Colin Cross <ccross@android.com>
+  */
+ 
++#include <asm/sysreg.h>
++#include <asm/ptrace.h>
++
+ #include <linux/kernel.h>
+ #include <linux/cpu_pm.h>
+ #include <linux/module.h>
+@@ -200,14 +203,28 @@ static void cpu_pm_resume(void)
+ 	cpu_pm_exit();
+ }
+ 
++static int ugly_hack_cpuidle_cpu_pm_notify(struct notifier_block *self,
++					   unsigned long action, void *hcpu)
++{
++	if (read_sysreg(CurrentEL) == CurrentEL_EL1)
++		return notifier_from_errno(-EBUSY);
++
++	return NOTIFY_OK;
++}
++
+ static struct syscore_ops cpu_pm_syscore_ops = {
+ 	.suspend = cpu_pm_suspend,
+ 	.resume = cpu_pm_resume,
+ };
+ 
++static struct notifier_block ugly_hack_cpuidle_cpu_pm_notifier = {
++	.notifier_call = ugly_hack_cpuidle_cpu_pm_notify,
++};
++
+ static int cpu_pm_init(void)
+ {
+ 	register_syscore_ops(&cpu_pm_syscore_ops);
++	cpu_pm_register_notifier(&ugly_hack_cpuidle_cpu_pm_notifier);
+ 	return 0;
+ }
+ core_initcall(cpu_pm_init);
+-- 
+2.43.0
+
