@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <!-- NVIDIA Tegra public git server -->
+  <remote name="nv-tegra"
+          fetch="git://nv-tegra.nvidia.com/" />
+
+  <!-- Default to nv-tegra remote and jetson_36.4.4 tag -->
+  <default remote="nv-tegra"
+           revision="refs/tags/jetson_36.4.4"
+           sync-j="4" />
+
+  <!-- ========== Kernel repositories ========== -->
+
+  <!-- Ubuntu kernel source -->
+  <project name="3rdparty/canonical/linux-jammy"
+           path="kernel/kernel-jammy-src" />
+
+  <!-- NVIDIA GPU driver (out-of-tree) -->
+  <project name="linux-nvgpu"
+           path="nvgpu" />
+
+  <!-- NVIDIA out-of-tree platform drivers -->
+  <project name="linux-nv-oot"
+           path="nvidia-oot" />
+
+  <!-- Hardware Performance Monitor -->
+  <project name="linux-hwpm"
+           path="hwpm" />
+
+  <!-- NVIDIA Ethernet driver (nested under nvidia-oot) -->
+  <project name="kernel/nvethernetrm"
+           path="nvethernetrm">
+    <linkfile src="." dest="nvidia-oot/drivers/net/ethernet/nvidia/nvethernet/nvethernetrm" />
+  </project>
+
+  <!-- Kernel device tree sources -->
+  <project name="linux/kernel-devicetree"
+           path="kernel-devicetree" />
+
+  <!-- T23x device tree sources -->
+  <project name="device/hardware/nvidia/t23x-public-dts"
+           path="hardware/nvidia/t23x/nv-public" />
+
+  <!-- Tegra common device tree sources -->
+  <project name="device/hardware/nvidia/tegra-public-dts"
+           path="hardware/nvidia/tegra/nv-public" />
+
+  <!-- NVIDIA display driver (out-of-tree) -->
+  <project name="tegra/kernel-src/nv-kernel-display-driver"
+           path="nvdisplay" />
+
+  <!-- Device tree compiler -->
+  <project name="3rdparty/dtc-src/1.4.5"
+           path="dtc-src/1.4.5" />
+
+  <!-- ========== Other repositories ========== -->
+
+  <!-- Argus camera -->
+  <project name="tegra/argus-cam-libav/argus_cam_libavencoder"
+           path="tegra/argus-cam-libav/argus_cam_libavencoder" />
+
+  <!-- CUDA samples -->
+  <project name="tegra/cuda-src/nvsample_cudaprocess"
+           path="tegra/cuda-src/nvsample_cudaprocess" />
+
+  <!-- X config utility -->
+  <project name="tegra/gfx-src/nv-xconfig"
+           path="tegra/gfx-src/nv-xconfig" />
+
+  <!-- GStreamer plugins -->
+  <project name="tegra/gst-src/gst-egl"
+           path="tegra/gst-src/gst-egl" />
+
+  <project name="tegra/gst-src/gst-jpeg"
+           path="tegra/gst-src/gst-jpeg" />
+
+  <project name="tegra/gst-src/gst-nvarguscamera"
+           path="tegra/gst-src/gst-nvarguscamera" />
+
+  <project name="tegra/gst-src/gst-nvcompositor"
+           path="tegra/gst-src/gst-nvcompositor" />
+
+  <project name="tegra/gst-src/gst-nvtee"
+           path="tegra/gst-src/gst-nvtee" />
+
+  <project name="tegra/gst-src/gst-nvv4l2camera"
+           path="tegra/gst-src/gst-nvv4l2camera" />
+
+  <project name="tegra/gst-src/gst-nvvidconv"
+           path="tegra/gst-src/gst-nvvidconv" />
+
+  <project name="tegra/gst-src/gst-nvvideo4linux2"
+           path="tegra/gst-src/gst-nvvideo4linux2" />
+
+  <project name="tegra/gst-src/nvgstapps"
+           path="tegra/gst-src/nvgstapps" />
+
+  <project name="tegra/gst-src/libgstnvcustomhelper"
+           path="tegra/gst-src/libgstnvcustomhelper" />
+
+  <project name="tegra/gst-src/libgstnvdrmvideosink"
+           path="tegra/gst-src/libgstnvdrmvideosink" />
+
+  <project name="tegra/gst-src/libgstnvvideosinks"
+           path="tegra/gst-src/libgstnvvideosinks" />
+
+  <project name="tegra/gst-src/opencv_gst_samples"
+           path="tegra/gst-src/opencv_gst_samples" />
+
+  <!-- V4L2 libraries -->
+  <project name="tegra/v4l2-src/libv4l2_nvargus"
+           path="tegra/v4l2-src/libv4l2_nvargus" />
+
+  <project name="tegra/v4l2-src/v4l2_libs"
+           path="tegra/v4l2-src/v4l2_libs" />
+
+  <!-- NvSci headers and samples -->
+  <project name="tegra/nv-sci-src/nvsci_headers"
+           path="tegra/nv-sci-src/nvsci_headers" />
+
+  <project name="tegra/nv-sci-src/nvsci_samples"
+           path="tegra/nv-sci-src/nvsci_samples" />
+
+  <!-- OpenWFD headers -->
+  <project name="tegra/openwfd-src/openwfd_headers"
+           path="tegra/openwfd-src/openwfd_headers" />
+
+  <!-- Secure world: OP-TEE and ATF -->
+  <project name="tegra/optee-src/atf"
+           path="tegra/optee-src/atf" />
+
+  <project name="tegra/optee-src/nv-optee"
+           path="tegra/optee-src/nv-optee" />
+
+  <!-- SPE FreeRTOS BSP -->
+  <project name="tegra/spe-src/spe-freertos-bsp"
+           path="tegra/spe-src/spe-freertos-bsp" />
+
+</manifest>

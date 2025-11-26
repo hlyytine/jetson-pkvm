@@ -1,7 +1,6 @@
 # Table of contents
 
 - [Install build dependencies](#install-build-dependencies)
-  - [OP-TEE and ATF](#op-tee-and-atf)
 - [Set up Jetson 36.4.4](#set-up-jetson-3644)
 - [Use your own kernel](#use-your-own-kernel)
   - [Check out the pKVM kernel for Jetson](#check-out-android-common-kernel)
@@ -26,12 +25,12 @@
 
 These are for Ubuntu 24.04.1 LTS.
 
-## OP-TEE and ATF
-
 ```
 sudo apt update
-sudo apt install python3-pycryptodome python3-pyelftools
+sudo apt install repo python3-pycryptodome python3-pyelftools
 ```
+
+The `repo` tool is used to fetch NVIDIA source repositories from the manifest.
 
 # Set up Jetson 36.4.4
 
