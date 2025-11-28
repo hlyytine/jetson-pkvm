@@ -60,11 +60,8 @@ tar -C ${WORKSPACE}/toolchain -xjf ${DLDIR}/aarch64--glibc--stable-2022.08-1.tar
 cd ${WORKSPACE}/toolchain/aarch64--glibc--stable-2022.08-1
 ./relocate-sdk.sh
 
-# Checkout NVIDIA sources using repo manifest
-# (symlink for nvethernetrm is created automatically via <linkfile> in manifest)
-cd ${LDK_DIR}/source
-repo init -u ${WORKSPACE} -m manifests/jetson-36.4.4.xml
-repo sync -j4
+# Note: Sources should already be fetched via repo manifest before running this script.
+# See docs/repo.md for repo init/sync instructions.
 
 CROSS_COMPILE_AARCH64_PATH=${WORKSPACE}/toolchain/aarch64--glibc--stable-2022.08-1
 

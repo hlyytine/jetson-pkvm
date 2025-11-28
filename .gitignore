@@ -1,0 +1,11 @@
+# Generated environment file
+env.sh
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# Build outputs
+Linux_for_Tegra/
+toolchain/

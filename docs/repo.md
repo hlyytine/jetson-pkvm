@@ -8,41 +8,78 @@ NVIDIA's `Linux_for_Tegra/source/source_sync.sh` script clones 35 git repositori
 
 The manifest also includes our custom/modified repositories from GitHub for pKVM GPU virtualization work.
 
-## Manifest Location
+## Manifest Repository
+
+Manifests are maintained in a separate repository:
 
 ```
-manifests/jetson-36.4.4.xml
+https://github.com/hlyytine/tiiuae-pkvm-manifest.git
 ```
 
 ## Usage
 
 ```bash
-cd ${LDK_DIR}/source
+# Create workspace (can be any directory)
+mkdir -p ~/pkvm
+cd ~/pkvm
+export WORKSPACE=$(pwd)
 
-# Initialize repo with the manifest (uses ${WORKSPACE} as manifest repo)
-repo init -u ${WORKSPACE} -m manifests/jetson-36.4.4.xml
+# Initialize repo with the manifest
+repo init -u https://github.com/hlyytine/tiiuae-pkvm-manifest.git -b main -m jetson-36.4.4.xml
 
 # Sync all repositories
 repo sync -j4
+
+# Set LDK_DIR
+export LDK_DIR=${WORKSPACE}/Linux_for_Tegra
 ```
 
-This is done automatically by `scripts/jetson-bsp-setup.sh`.
+**Note:** `env.sh` is not provided by the repo - create it yourself or use `scripts/jetson-bsp-setup.sh` which generates it.
 
-## Ethernet Driver Symlink
+### Directory Structure
 
-The `nvethernetrm` repository contains Ethernet driver sources that are built as part of `nvidia-oot`, but it's maintained in a separate repository. A symlink is needed to place it in the expected location within the nvidia-oot tree.
+After sync, the structure is:
+```
+~/pkvm/                              # workspace root (${WORKSPACE})
+├── jetson-pkvm/                     # pKVM workspace repo (actual files)
+├── Linux_for_Tegra/
+│   └── source/                      # BSP sources (${LDK_DIR}/source)
+│       ├── kernel/linux/            # pKVM kernel
+│       ├── nvgpu/
+│       ├── nvidia-oot/
+│       └── ...
+│
+│ (symlinks to jetson-pkvm/)
+├── scripts -> jetson-pkvm/scripts
+├── docs -> jetson-pkvm/docs
+├── patches -> jetson-pkvm/patches
+├── autopilot -> jetson-pkvm/autopilot
+├── README.md -> jetson-pkvm/README.md
+└── CLAUDE.md -> jetson-pkvm/CLAUDE.md
+```
 
-This symlink is created automatically via `<linkfile>` in the manifest:
+## Symlinks
+
+The manifest uses `<linkfile>` elements to create symlinks from `jetson-pkvm/` to the workspace root:
 
 ```xml
-<project name="kernel/nvethernetrm" path="nvethernetrm">
-  <linkfile src="." dest="nvidia-oot/drivers/net/ethernet/nvidia/nvethernet/nvethernetrm" />
+<project name="hlyytine/jetson-pkvm" path="jetson-pkvm" ...>
+  <linkfile src="scripts" dest="scripts" />
+  <linkfile src="docs" dest="docs" />
+  <linkfile src="patches" dest="patches" />
+  <linkfile src="autopilot" dest="autopilot" />
+  <linkfile src="README.md" dest="README.md" />
+  <linkfile src="CLAUDE.md" dest="CLAUDE.md" />
 </project>
 ```
 
-After `repo sync`, the symlink exists at:
+## Ethernet Driver Symlink
+
+The `nvethernetrm` repository contains Ethernet driver sources that are built as part of `nvidia-oot`, but it's maintained in a separate repository. This symlink is created automatically via `<linkfile>` in the manifest:
+
 ```
-nvidia-oot/drivers/net/ethernet/nvidia/nvethernet/nvethernetrm -> ../../../../../../nvethernetrm
+Linux_for_Tegra/source/nvidia-oot/drivers/net/ethernet/nvidia/nvethernet/nvethernetrm
+  -> ../../../../../../nvethernetrm
 ```
 
 ## Custom/Modified Repositories
@@ -51,16 +88,17 @@ These repositories contain our modifications for pKVM GPU virtualization on Tegr
 
 | Path | Repository | Branch | Description |
 |------|------------|--------|-------------|
-| `kernel/linux` | `github:hlyytine/linux` | `tegra/pkvm-mainline-6.17-smmu-backup` | pKVM kernel with SMMUv2 support |
+| `jetson-pkvm` | `github:hlyytine/jetson-pkvm` | `claude` | Workspace: scripts, docs, patches |
+| `Linux_for_Tegra/source/kernel/linux` | `github:hlyytine/linux` | `tegra/pkvm-mainline-6.17-smmu-backup` | pKVM kernel with SMMUv2 support |
 
 ## Repository Summary
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| Custom | 1 | Modified repositories for pKVM support |
+| Custom | 2 | Modified repositories for pKVM support |
 | Kernel | 10 | Core kernel, GPU driver, device trees, display driver |
 | Other | 25 | GStreamer plugins, camera, OP-TEE/ATF, CUDA samples |
-| **Total** | **36** | All repos |
+| **Total** | **37** | All repos |
 
 ### Kernel Repositories (NVIDIA stock)
 
