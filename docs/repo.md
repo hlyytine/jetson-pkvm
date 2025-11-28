@@ -90,13 +90,14 @@ These repositories contain our modifications for pKVM GPU virtualization on Tegr
 |------|------------|--------|-------------|
 | `jetson-pkvm` | `github:hlyytine/jetson-pkvm` | `claude` | Workspace: scripts, docs, patches |
 | `Linux_for_Tegra/source/kernel/linux` | `github:hlyytine/linux` | `tegra/pkvm-mainline-6.17-smmu-backup` | pKVM kernel with SMMUv2 support |
+| `Linux_for_Tegra/source/nvidia-oot` | `github:hlyytine/linux-nv-oot` | `rel-38-for-nvgpu-rel-36` | Platform drivers (custom fork) |
 
 ## Repository Summary
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| Custom | 2 | Modified repositories for pKVM support |
-| Kernel | 10 | Core kernel, GPU driver, device trees, display driver |
+| Custom | 3 | Modified repositories for pKVM support |
+| Kernel | 9 | Core kernel, GPU driver, device trees, display driver |
 | Other | 25 | GStreamer plugins, camera, OP-TEE/ATF, CUDA samples |
 | **Total** | **37** | All repos |
 
@@ -106,7 +107,6 @@ These repositories contain our modifications for pKVM GPU virtualization on Tegr
 |------|------------|-------------|
 | `kernel/kernel-jammy-src` | `3rdparty/canonical/linux-jammy` | Ubuntu 22.04 kernel (5.15.x) |
 | `nvgpu` | `linux-nvgpu` | NVIDIA GPU driver (out-of-tree) |
-| `nvidia-oot` | `linux-nv-oot` | Platform drivers, misc drivers |
 | `hwpm` | `linux-hwpm` | Hardware Performance Monitor |
 | `nvethernetrm` | `kernel/nvethernetrm` | Ethernet driver sources |
 | `kernel-devicetree` | `linux/kernel-devicetree` | Kernel device tree sources |
