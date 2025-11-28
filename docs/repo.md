@@ -16,6 +16,26 @@ Manifests are maintained in a separate repository:
 https://github.com/hlyytine/tiiuae-pkvm-manifest.git
 ```
 
+### Available Manifests
+
+| Manifest | Description |
+|----------|-------------|
+| `pkvm-jetson-36.4.4.xml` | pKVM-enabled Jetson AGX Orin (includes custom kernel and drivers) |
+| `jetson-36.4.4.xml` | Base NVIDIA stock BSP (L4T 36.4.4) |
+
+### Manifest Structure
+
+The manifests use an inheritance pattern (similar to [tii_sel4_manifest](https://github.com/tiiuae/tii_sel4_manifest)):
+
+```
+pkvm-jetson-36.4.4.xml
+    ├── <include name="jetson-36.4.4.xml" />   (base NVIDIA repos)
+    ├── <remote name="tiiuae" />                (github.com/hlyytine/)
+    ├── <project> jetson-pkvm                   (new: pKVM workspace)
+    ├── <project> linux                         (new: pKVM kernel)
+    └── <extend-project> linux-nv-oot           (override: use tiiuae remote)
+```
+
 ## Usage
 
 ```bash
@@ -24,17 +44,20 @@ mkdir -p ~/pkvm
 cd ~/pkvm
 export WORKSPACE=$(pwd)
 
-# Initialize repo with the manifest
-repo init -u https://github.com/hlyytine/tiiuae-pkvm-manifest.git -b main -m jetson-36.4.4.xml
-
-# Sync all repositories
+# Initialize and sync
+# (use -m jetson-36.4.4.xml for stock NVIDIA BSP without pKVM)
+repo init -u https://github.com/hlyytine/tiiuae-pkvm-manifest.git -b main -m pkvm-jetson-36.4.4.xml
 repo sync -j4
 
-# Set LDK_DIR
-export LDK_DIR=${WORKSPACE}/Linux_for_Tegra
-```
+# Setup BSP (downloads toolchain, unpacks rootfs, creates env.sh)
+./scripts/jetson-bsp-setup.sh
 
-**Note:** `env.sh` is not provided by the repo - create it yourself or use `scripts/jetson-bsp-setup.sh` which generates it.
+# Source environment
+. ${WORKSPACE}/env.sh
+
+# Optional: add to ~/.bashrc for automatic environment setup
+echo ". ${WORKSPACE}/env.sh" >> ~/.bashrc
+```
 
 ### Directory Structure
 
@@ -88,9 +111,9 @@ These repositories contain our modifications for pKVM GPU virtualization on Tegr
 
 | Path | Repository | Branch | Description |
 |------|------------|--------|-------------|
-| `jetson-pkvm` | `github:hlyytine/jetson-pkvm` | `claude` | Workspace: scripts, docs, patches |
-| `Linux_for_Tegra/source/kernel/linux` | `github:hlyytine/linux` | `tegra/pkvm-mainline-6.17-smmu-backup` | pKVM kernel with SMMUv2 support |
-| `Linux_for_Tegra/source/nvidia-oot` | `github:hlyytine/linux-nv-oot` | `rel-38-for-nvgpu-rel-36` | Platform drivers (custom fork) |
+| `jetson-pkvm` | `tiiuae:jetson-pkvm` | `claude` | Workspace: scripts, docs, patches |
+| `Linux_for_Tegra/source/kernel/linux` | `tiiuae:linux` | `tegra/pkvm-mainline-6.17-smmu-backup` | pKVM kernel with SMMUv2 support |
+| `Linux_for_Tegra/source/nvidia-oot` | `tiiuae:linux-nv-oot` | `rel-38-for-nvgpu-rel-36` | Platform drivers (via extend-project) |
 
 ## Repository Summary
 
