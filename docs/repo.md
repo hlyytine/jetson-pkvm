@@ -6,6 +6,8 @@ This document describes the Google repo manifest that replaces NVIDIA's `source_
 
 NVIDIA's `Linux_for_Tegra/source/source_sync.sh` script clones 35 git repositories from `nv-tegra.nvidia.com`. We've converted this to a Google repo manifest for easier management, reproducibility, and selective syncing.
 
+The manifest also includes our custom/modified repositories from GitHub for pKVM GPU virtualization work.
+
 ## Manifest Location
 
 ```
@@ -43,15 +45,24 @@ After `repo sync`, the symlink exists at:
 nvidia-oot/drivers/net/ethernet/nvidia/nvethernet/nvethernetrm -> ../../../../../../nvethernetrm
 ```
 
+## Custom/Modified Repositories
+
+These repositories contain our modifications for pKVM GPU virtualization on Tegra234.
+
+| Path | Repository | Branch | Description |
+|------|------------|--------|-------------|
+| `kernel/linux` | `github:hlyytine/linux` | `tegra/pkvm-mainline-6.17-smmu-backup` | pKVM kernel with SMMUv2 support |
+
 ## Repository Summary
 
 | Category | Count | Description |
 |----------|-------|-------------|
+| Custom | 1 | Modified repositories for pKVM support |
 | Kernel | 10 | Core kernel, GPU driver, device trees, display driver |
 | Other | 25 | GStreamer plugins, camera, OP-TEE/ATF, CUDA samples |
-| **Total** | **35** | All repos from nv-tegra.nvidia.com |
+| **Total** | **36** | All repos |
 
-### Kernel Repositories
+### Kernel Repositories (NVIDIA stock)
 
 | Path | Repository | Description |
 |------|------------|-------------|

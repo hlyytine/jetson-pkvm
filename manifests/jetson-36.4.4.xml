@@ -4,12 +4,24 @@
   <remote name="nv-tegra"
           fetch="git://nv-tegra.nvidia.com/" />
 
+  <!-- GitHub for custom/modified repositories -->
+  <remote name="github"
+          fetch="https://github.com/" />
+
   <!-- Default to nv-tegra remote and jetson_36.4.4 tag -->
   <default remote="nv-tegra"
            revision="refs/tags/jetson_36.4.4"
            sync-j="4" />
 
-  <!-- ========== Kernel repositories ========== -->
+  <!-- ========== Custom/Modified repositories ========== -->
+
+  <!-- pKVM kernel with SMMUv2 support for Tegra234 -->
+  <project name="hlyytine/linux"
+           path="kernel/linux"
+           remote="github"
+           revision="tegra/pkvm-mainline-6.17-smmu-backup" />
+
+  <!-- ========== Kernel repositories (NVIDIA stock) ========== -->
 
   <!-- Ubuntu kernel source -->
   <project name="3rdparty/canonical/linux-jammy"
