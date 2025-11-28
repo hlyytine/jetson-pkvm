@@ -29,11 +29,10 @@ The manifests use an inheritance pattern (similar to [tii_sel4_manifest](https:/
 
 ```
 pkvm-jetson-36.4.4.xml
-    ├── <include name="jetson-36.4.4.xml" />   (base NVIDIA repos)
-    ├── <remote name="tiiuae" />                (github.com/hlyytine/)
-    ├── <project> jetson-pkvm                   (new: pKVM workspace)
-    ├── <project> linux                         (new: pKVM kernel)
-    └── <extend-project> linux-nv-oot           (override: use tiiuae remote)
+    ├── <include name="jetson-36.4.4.xml" />   (vanilla NVIDIA BSP)
+    ├── <include name="common.xml" />           (TII UAE workspace)
+    ├── <project> linux                         (pKVM kernel)
+    └── <extend-project> linux-nv-oot           (custom fork)
 ```
 
 ## Usage
@@ -45,7 +44,6 @@ cd ~/pkvm
 export WORKSPACE=$(pwd)
 
 # Initialize and sync
-# (use -m jetson-36.4.4.xml for stock NVIDIA BSP without pKVM)
 repo init -u https://github.com/hlyytine/tiiuae-pkvm-manifest.git -b main -m pkvm-jetson-36.4.4.xml
 repo sync -j4
 
