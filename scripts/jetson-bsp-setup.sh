@@ -49,6 +49,9 @@ sudo ./tools/l4t_create_default_user.sh -u ubuntu -p ubuntu -a --accept-license
 # Make target filesystem faster
 sudo sed -i -e 's/defaults/defaults,noatime,discard/g' ${LDK_DIR}/rootfs/etc/fstab
 
+# Update kernel source directory to match manifest (linux instead of kernel-jammy-src)
+sed -i -e 's/KERNEL_SRC_DIR="kernel-jammy-src"/KERNEL_SRC_DIR="linux"/' ${LDK_DIR}/source/kernel_src_build_env.sh
+
 # Install our convenience scripts
 sudo install -d ${LDK_DIR}/rootfs/usr/bin
 sudo install ${WORKSPACE}/scripts/install-cargo-deps.sh ${LDK_DIR}/rootfs/usr/bin
