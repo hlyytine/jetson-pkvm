@@ -35,7 +35,7 @@ fi
 cleanup() {
     if [ -f "${ROOTFS}/boot/Image.stock" ]; then
         echo "Restoring stock kernel..."
-        mv "${ROOTFS}/boot/Image.stock" "${ROOTFS}/boot/Image"
+        sudo mv "${ROOTFS}/boot/Image.stock" "${ROOTFS}/boot/Image"
     fi
 }
 trap cleanup EXIT
@@ -51,11 +51,11 @@ cd ${LDK_DIR}/source
 
 # Backup stock kernel
 echo "Backing up stock kernel..."
-cp "${ROOTFS}/boot/Image" "${ROOTFS}/boot/Image.stock"
+sudo cp "${ROOTFS}/boot/Image" "${ROOTFS}/boot/Image.stock"
 
 # Install custom kernel temporarily
 echo "Installing custom kernel temporarily..."
-cp "${CUSTOM_IMAGE}" "${ROOTFS}/boot/Image"
+sudo cp "${CUSTOM_IMAGE}" "${ROOTFS}/boot/Image"
 
 # Update initrd (will detect version from custom kernel)
 echo "Updating initrd..."
@@ -64,13 +64,13 @@ sudo ./tools/l4t_update_initrd.sh
 
 # Copy DTB to rootfs with versioned name
 echo "Copying DTB..."
-mkdir -p "${ROOTFS}/boot/dtb"
-cp "${DTB_OUT}/${DTB_NAME}" "${ROOTFS}/boot/dtb/${DTB_NAME%.dtb}-${KVER}.dtb"
+sudo mkdir -p "${ROOTFS}/boot/dtb"
+sudo cp "${DTB_OUT}/${DTB_NAME}" "${ROOTFS}/boot/dtb/${DTB_NAME%.dtb}-${KVER}.dtb"
 
 # Create package
 echo "Creating package..."
 cd ${ROOTFS}
-sudo tar -cvzf ${WORKSPACE}/kernel-${KVER}.tar.gz \
+sudo tar -cvpzf ${WORKSPACE}/kernel-${KVER}.tar.gz \
     --transform="s|boot/Image|boot/Image-${KVER}|" \
     --transform="s|boot/initrd|boot/initrd-${KVER}|" \
     boot/Image \
