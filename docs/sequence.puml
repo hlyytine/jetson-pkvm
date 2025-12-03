@@ -1,0 +1,71 @@
+@startuml autopilot_sequence
+skinparam backgroundColor #FEFEFE
+
+title Autopilot Kernel Test Sequence
+
+participant "Main Thread" as Main
+participant "Board (UART)" as Board
+participant "Target (SSH)" as Target
+participant "Recovery Thread" as RecoveryThread
+database "Filesystem" as FS
+
+== Daemon Startup ==
+
+Main -> Board: board.boot()
+Board --> Main: extlinux menu
+Main -> Board: send '1' (vanilla kernel)
+Board --> Main: shell prompt
+note right of Main: Board ready\n(5.15.148)
+
+== Request Processing ==
+
+FS -> Main: .request file found
+Main -> FS: move to processing/
+
+Main -> Target: SCP kernel
+Target --> Main: upload complete
+
+Main -> Target: SSH reboot
+Target --> Main: connection closed
+
+Main -> Board: wait extlinux menu
+Board --> Main: menu ready
+Main -> Board: send '2' (test kernel)
+
+note right of Board: Test kernel booting
+
+Main -> Board: monitor UART
+
+alt Kernel Panic
+    Board --> Main: Kernel panic
+else SMMU Faults
+    Board --> Main: SMMU fault (x5)
+else Timeout
+    Board --> Main: 300s timeout
+end
+
+Main -> Main: stop hyp logging
+
+== Parallel: Recovery + Log Filtering ==
+
+Main -> RecoveryThread: start thread
+activate RecoveryThread #LightBlue
+note over RecoveryThread: board.boot()\nextlinux '1'\nwait SSH
+
+Main -> Main: filter_mb1_start.py
+Main -> Main: filter_kernel_start.py
+Main -> Main: filter_nvhe_bug.py
+Main -> Main: filter_hyp_output.py
+Main -> Main: filter_smmu_faults.py
+Main -> Main: disasm_2nd_frame.py
+
+Main -> FS: move to completed/
+note right of Main #LightGreen: Results ready!
+
+Main -> RecoveryThread: join()
+RecoveryThread --> Main: done
+deactivate RecoveryThread
+
+note right of Main: Board ready\nfor next request
+
+@enduml
