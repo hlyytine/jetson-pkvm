@@ -1,0 +1,153 @@
+// Autopilot State Machine
+// Render with: dot -Tpng statemachine.dot -o statemachine.png
+//          or: dot -Tsvg statemachine.dot -o statemachine.svg
+
+digraph autopilot {
+    rankdir=TB;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=10];
+    edge [fontname="Helvetica", fontsize=9];
+
+    // Node styles
+    node [shape=box, style="rounded,filled", fillcolor="#e8f4e8"];
+
+    // Special states
+    START [shape=circle, label="", width=0.3, fillcolor="#333333"];
+    MANUAL [shape=doubleoctagon, fillcolor="#ffcccc", label="Manual\nIntervention"];
+
+    // Main states
+    STARTUP [label="STARTUP\n─────────\nboard.boot()\nextlinux '1'\nwait SSH prompt", fillcolor="#cce5ff"];
+
+    READY [label="READY\n─────────\nBoard running 5.15.148\nSSH accessible\nWaiting for requests", fillcolor="#d4edda"];
+
+    UPLOAD [label="UPLOAD\n─────────\nSCP kernel to\n/boot/Image-$KVER", fillcolor="#fff3cd"];
+
+    REBOOT [label="REBOOT\n─────────\nSSH reboot command", fillcolor="#fff3cd"];
+
+    PANIC_BOOT [label="PANIC_BOOT\n─────────\nWait extlinux menu\nSend boot option '2'\n(test kernel)", fillcolor="#fff3cd"];
+
+    PANIC_WAIT [label="PANIC_WAIT\n─────────\nMonitor UART for:\n• Kernel panic\n• SMMU faults\n• nvgpu ACR fail\n• bash prompt\n• timeout", fillcolor="#ffe5cc"];
+
+    STOP_HYP [label="STOP_HYP_LOG\n─────────\nStop hyp logging\nthread", fillcolor="#e8f4e8"];
+
+    // Fork point - recovery thread spawned
+    FORK [shape=rectangle, width=1.5, height=0.08, label="", fillcolor="#333333"];
+
+    // Parallel states
+    RECOVERY [label="RECOVERY\n(background thread)\n─────────\nboard.boot()\nextlinux '1'\nwait SSH prompt", fillcolor="#cce5ff"];
+
+    LOG_FILTER [label="LOG_FILTER\n(main thread)\n─────────\nfilter_mb1_start\nfilter_kernel_start\nfilter_nvhe_bug\nfilter_hyp_output\nfilter_smmu_faults\ndisasm_2nd_frame", fillcolor="#e2d5f1"];
+
+    COMPLETE [label="COMPLETE\n─────────\nMove request to\ncompleted/\nLog results", fillcolor="#d4edda"];
+
+    // Join point
+    JOIN [shape=rectangle, width=1.5, height=0.08, label="", fillcolor="#333333"];
+
+    WAIT_RECOVERY [label="WAIT_RECOVERY\n─────────\nrecovery_thread.join()\nCheck for exceptions", fillcolor="#cce5ff"];
+
+    FAILED [label="FAILED\n─────────\nMove request to\nfailed/\nLog error", fillcolor="#f8d7da"];
+
+    // Main flow transitions
+    START -> STARTUP [label="daemon start"];
+    STARTUP -> READY [label="SSH prompt seen"];
+    STARTUP -> MANUAL [label="timeout/error", style=dashed, color="#cc0000"];
+
+    READY -> READY [label="no requests\n(poll 1s)"];
+    READY -> UPLOAD [label=".request file\nfound"];
+
+    UPLOAD -> REBOOT [label="SCP success"];
+    UPLOAD -> FAILED [label="SCP error", style=dashed, color="#cc0000"];
+
+    REBOOT -> PANIC_BOOT [label="reboot sent"];
+
+    PANIC_BOOT -> PANIC_WAIT [label="extlinux '2' sent"];
+    PANIC_BOOT -> FAILED [label="timeout", style=dashed, color="#cc0000"];
+
+    PANIC_WAIT -> STOP_HYP [label="fault detected /\ntimeout (300s)"];
+
+    STOP_HYP -> FORK [label="spawn thread"];
+
+    // Fork - recovery starts first, then log filtering
+    FORK -> RECOVERY [label="1. start\nthread", style=bold, color="#0066cc"];
+    FORK -> LOG_FILTER [label="2. then\ncontinue", style=bold, color="#6600cc"];
+
+    // Main thread: filtering -> complete -> wait for recovery
+    LOG_FILTER -> COMPLETE [label="filtering\ndone", style=bold, color="#6600cc"];
+    COMPLETE -> JOIN [style=bold, color="#6600cc"];
+
+    // Recovery thread joins
+    RECOVERY -> JOIN [style=bold, color="#0066cc", constraint=false];
+
+    JOIN -> WAIT_RECOVERY;
+
+    WAIT_RECOVERY -> READY [label="recovery OK"];
+    WAIT_RECOVERY -> FAILED [label="recovery exception", style=dashed, color="#cc0000"];
+
+    // Error recovery path
+    FAILED -> RECOVERY [label="attempt recovery", style=dotted];
+    RECOVERY -> READY [label="recovery OK\n(from failure)", style=dotted];
+    RECOVERY -> MANUAL [label="recovery failed", style=dashed, color="#cc0000"];
+
+    // Layout hints
+    {rank=same; RECOVERY; LOG_FILTER}
+    {rank=same; COMPLETE}
+
+    // Legend
+    subgraph cluster_legend {
+        label="Legend";
+        fontsize=11;
+        style="rounded";
+        bgcolor="#ffffff";
+
+        node [shape=plaintext, fillcolor="#ffffff"];
+
+        L1 [label=<
+            <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+            <TR><TD ALIGN="LEFT">───── Normal flow</TD></TR>
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#cc0000">- - - - Error path</FONT></TD></TR>
+            <TR><TD ALIGN="LEFT">• • • • Recovery attempt</TD></TR>
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#0066cc">━━━ Background thread</FONT></TD></TR>
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#6600cc">━━━ Main thread</FONT></TD></TR>
+            <TR><TD ALIGN="LEFT">▬▬▬ Fork/Join bar</TD></TR>
+            </TABLE>
+        >];
+    }
+
+    // Fault types annotation
+    subgraph cluster_faults {
+        label="Detected Fault Types";
+        fontsize=11;
+        style="rounded";
+        bgcolor="#ffffff";
+
+        node [shape=plaintext, fillcolor="#ffffff"];
+        FAULTS [label=<
+            <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+            <TR><TD ALIGN="LEFT">• panic - Kernel panic</TD></TR>
+            <TR><TD ALIGN="LEFT">• smmu_fault - SMMU errors</TD></TR>
+            <TR><TD ALIGN="LEFT">• nvgpu_acr_fail - GPU boot fail</TD></TR>
+            <TR><TD ALIGN="LEFT">• bash_prompt - Emergency shell</TD></TR>
+            <TR><TD ALIGN="LEFT">• timeout - No fault in 300s</TD></TR>
+            <TR><TD ALIGN="LEFT">• eof - Connection lost</TD></TR>
+            </TABLE>
+        >];
+    }
+
+    // Timeline annotation
+    subgraph cluster_timeline {
+        label="Parallel Execution Timeline";
+        fontsize=11;
+        style="rounded";
+        bgcolor="#ffffff";
+
+        node [shape=plaintext, fillcolor="#ffffff"];
+        TIMELINE [label=<
+            <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#0066cc">recovery:</FONT>  |======= board.boot() ======= extlinux ======= wait SSH =======|</TD></TR>
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#6600cc">main:    </FONT>  |= filter =|= disasm =|= COMPLETE =|........ join() .........|</TD></TR>
+            <TR><TD ALIGN="LEFT">              t0           t1           t2     ↑                       t3</TD></TR>
+            <TR><TD ALIGN="LEFT">                                         results ready!</TD></TR>
+            </TABLE>
+        >];
+    }
+}
