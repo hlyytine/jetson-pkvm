@@ -1,0 +1,90 @@
+@startuml autopilot_states
+skinparam backgroundColor #FEFEFE
+skinparam state {
+    BackgroundColor #e8f4e8
+    BorderColor #333333
+}
+
+title Autopilot State Machine
+
+[*] --> STARTUP : daemon start
+
+state "STARTUP\n---\nboard.boot()\nextlinux '1'\nwait SSH" as STARTUP #cce5ff
+
+STARTUP --> READY : SSH prompt
+STARTUP --> MANUAL : timeout
+
+state "READY\n---\n5.15.148 running\nSSH accessible" as READY #d4edda
+
+READY --> READY : poll 1s
+READY --> UPLOAD : .request found
+
+state "UPLOAD\n---\nSCP kernel" as UPLOAD #fff3cd
+
+UPLOAD --> REBOOT : success
+UPLOAD --> FAILED : error
+
+state "REBOOT\n---\nSSH reboot" as REBOOT #fff3cd
+
+REBOOT --> PANIC_BOOT
+
+state "PANIC_BOOT\n---\nextlinux '2'" as PANIC_BOOT #fff3cd
+
+PANIC_BOOT --> PANIC_WAIT
+PANIC_BOOT --> FAILED : timeout
+
+state "PANIC_WAIT\n---\nMonitor UART" as PANIC_WAIT #ffe5cc
+
+PANIC_WAIT --> FORK : fault/timeout
+
+state "FORK" as FORK #333333
+
+state "RECOVERY\n(thread)\n---\nboard.boot()\nwait SSH" as RECOVERY #cce5ff
+
+state "LOG_FILTER\n(main)\n---\nfilter scripts\ndisassembly" as LOG_FILTER #e2d5f1
+
+FORK --> RECOVERY : 1. start thread
+FORK --> LOG_FILTER : 2. continue
+
+state "COMPLETE\n---\nMove to completed/\nResults ready!" as COMPLETE #d4edda
+
+LOG_FILTER --> COMPLETE
+
+state "JOIN" as JOIN #333333
+
+COMPLETE --> JOIN
+RECOVERY --> JOIN
+
+state "WAIT\n---\njoin thread" as WAIT #cce5ff
+
+JOIN --> WAIT
+
+WAIT --> READY : OK
+WAIT --> FAILED : exception
+
+state "FAILED\n---\nMove to failed/" as FAILED #f8d7da
+
+FAILED --> RECOVERY : retry
+
+state "MANUAL\n---\nIntervention\nRequired" as MANUAL #ffcccc
+
+RECOVERY --> MANUAL : failed
+
+note right of FORK
+  Thread starts first,
+  then main continues
+end note
+
+note right of COMPLETE
+  User sees results
+  before recovery done
+end note
+
+note left of PANIC_WAIT
+  Detects:
+  panic, smmu_fault,
+  nvgpu_acr_fail,
+  bash_prompt, timeout
+end note
+
+@enduml
