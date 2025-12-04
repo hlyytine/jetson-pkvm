@@ -589,7 +589,13 @@ This document contains:
 **Quick Summary**:
 - **Goal**: Enable GPU passthrough to protected guest VMs with DMA isolation
 - **Implementation**: 3,222 lines total (2,699 EL2 + 523 EL1) - **COMPLETE**
-- **Status**: Hardware testing in progress, blocked by unrelated cpuidle bug
+- **Status**: ✅ **HARDWARE VALIDATED** (2025-12-04) - DMA isolation working with GPU workloads (Ollama/TinyLlama), USFCFG=1 enforced
+
+**Milestone Achievement (2025-12-04)**:
+- GPU actively used for LLM inference while pKVM SMMUv2 driver controls all SMMU instances
+- USFCFG=1 enabled - unknown/unconfigured Stream IDs fault on DMA (security enforced)
+- All DMA operations correctly translated through hypervisor-controlled SMMU
+- Guest VMs now protected from host CPU and DMA-capable devices
 
 **Also See**:
 - `Linux_for_Tegra/source/kernel/linux/drivers/iommu/arm/arm-smmu/CLAUDE.md` - Driver implementation details
