@@ -69,12 +69,12 @@ cd ${WORKSPACE}/toolchain/aarch64--glibc--stable-2022.08-1
 CROSS_COMPILE_AARCH64_PATH=${WORKSPACE}/toolchain/aarch64--glibc--stable-2022.08-1
 
 cat > ${WORKSPACE}/env.sh <<EOF
-WORKSPACE=${WORKSPACE}
-# for generic use
+export WORKSPACE=${WORKSPACE}
 export CROSS_COMPILE=\${WORKSPACE}/toolchain/aarch64--glibc--stable-2022.08-1/bin/aarch64-buildroot-linux-gnu-
-# these two are for OP-TEE and ATF
 export CROSS_COMPILE_AARCH64_PATH=${WORKSPACE}/toolchain/aarch64--glibc--stable-2022.08-1
 export CROSS_COMPILE_AARCH64=${CROSS_COMPILE_AARCH64_PATH}/bin/aarch64-buildroot-linux-gnu-
 export LDK_DIR=\${WORKSPACE}/Linux_for_Tegra
 export INSTALL_MOD_PATH=\${LDK_DIR}/rootfs
+export ARCH=arm64
+export LOCALVERSION=-tegra
 EOF

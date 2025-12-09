@@ -784,7 +784,7 @@ No changes needed - MC driver already enabled in Tegra builds.
 **Step 1: Build and Deploy**
 ```bash
 cd ${LDK_DIR}/source/kernel/linux
-make ARCH=arm64 -j$(nproc)
+make -j$(nproc)
 
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 touch ${WORKSPACE}/autopilot/requests/pending/${TIMESTAMP}.request

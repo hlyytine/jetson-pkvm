@@ -695,6 +695,6 @@ This fix applies to **all devices** with multiple MC clients sharing the same SI
 
 **Commit**: `26a0964b8b91` - "memory: tegra: De-duplicate Stream IDs in fwspec population"
 
-**Branch**: `tegra/pkvm-mainline-6.17-smmu`
+**Branch**: `tegra/pkvm-mainline-6.18-smmu-claude`
 
 **Status**: ✅ **FIXED AND TESTED**

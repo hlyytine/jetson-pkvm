@@ -8,15 +8,15 @@ This is a GPU virtualization research project for NVIDIA Jetson AGX Orin (Tegra 
 
 **Working Directory:** `${WORKSPACE}` (set via `env.sh`)
 
-**Branch:** `gpuvm` - Main development branch for GPU virtualization work
+**Branch:** `tegra/pkvm-mainline-6.18-smmu-claude` - pKVM SMMUv2 development branch (kernel 6.18)
 
 **Platform:**
 - Device: NVIDIA Jetson AGX Orin (Tegra 234 SoC)
 - Architecture: ARM64 (aarch64)
 - Base: NVIDIA Jetson Linux (L4T) BSP 36.4.3
-- Target Kernel: Linux 6.17+ (Android common kernel android15-6.6.66_r00 or mainline)
+- Target Kernel: Linux 6.18 (pKVM mainline with SMMUv2 support)
 
-**Important:** Kernel 6.17+ requires upstream `CONFIG_TEGRA_HOST1X` to be disabled in favor of NVIDIA's OOT host1x driver due to extended APIs needed by nvdisplay. This is configured in the defconfig.
+**Important:** Kernel 6.18 requires upstream `CONFIG_TEGRA_HOST1X` to be disabled in favor of NVIDIA's OOT host1x driver due to extended APIs needed by nvdisplay. This is configured in the defconfig.
 
 ## Known Issues and Troubleshooting
 
@@ -27,19 +27,31 @@ This document tracks all attempted fixes, why they failed, and outstanding quest
 
 ## Environment Setup
 
-**CRITICAL:** Always source the environment before working:
-```bash
-export WORKSPACE=/home/hlyytine/pkvm
-. ${WORKSPACE}/env.sh
-```
+### Required Environment Variables
 
-Key environment variables:
+All build commands require these environment variables (provided by `env.sh`):
 - `LDK_DIR`: Points to `${WORKSPACE}/Linux_for_Tegra`
 - `WORKSPACE`: Root directory for the project (set in `env.sh`)
 - `CROSS_COMPILE`: Cross-compiler for kernel builds
 - `CROSS_COMPILE_AARCH64_PATH`: Path for OP-TEE/ATF builds
-- `ARCH=arm64`: Target architecture (exported, no need to pass to make)
-- `LOCALVERSION=-tegra`: Kernel version suffix (gives `6.17.0-tegra`, suppresses dirty `+`)
+- `ARCH=arm64`: Target architecture
+- `LOCALVERSION=-tegra`: Kernel version suffix (gives `6.18.0-tegra`, suppresses dirty `+`)
+
+### For Claude Code (Automatic)
+
+**All environment variables are automatically set** via a SessionStart hook in `.claude/settings.local.json`. No manual sourcing required - just run build commands directly.
+
+To set up a fresh clone for Claude Code, run:
+```bash
+./scripts/claude-setup.sh
+```
+
+### For Users (Manual)
+
+Source the environment before working:
+```bash
+. /path/to/pkvm/env.sh
+```
 
 ## Build Commands
 
@@ -65,7 +77,7 @@ make modules            # Build modules
 make clean
 ```
 
-**Note:** After sourcing `env.sh`, `ARCH=arm64` and `LOCALVERSION=-tegra` are exported. The kernel version will be `6.17.0-tegra` (no dirty `+` suffix).
+**Note:** The kernel version will be `6.18.0-tegra` (no dirty `+` suffix).
 
 **Out-of-tree modules** (nvgpu, nvidia-oot, etc.) still use nvbuild.sh:
 ```bash
@@ -364,10 +376,6 @@ This workflow uses `nvbuild.sh` to build everything (kernel + modules), creates 
 #### Step 1: Build Complete Kernel and Modules
 
 ```bash
-# Source environment
-export WORKSPACE=/home/hlyytine/pkvm
-. ${WORKSPACE}/env.sh
-
 # Build kernel + OOT modules using nvbuild.sh
 cd ${LDK_DIR}/source
 ./nvbuild.sh                # Build kernel and all OOT modules
@@ -564,9 +572,9 @@ pip install jinja2 libfdt
 - **Recovery kernel** must be copied to `kernel/Image` after rootfs installation
 - Flashing requires **sudo** and direct connection to Jetson device in recovery mode
 
-### Kernel 6.17+ Compatibility
+### Kernel 6.18 Compatibility
 
-**See**: [`docs/kernel_617_compat.md`](docs/kernel_617_compat.md) for detailed compatibility notes.
+**See**: [`docs/kernel_617_compat.md`](docs/kernel_617_compat.md) for detailed compatibility notes (applies to 6.17+).
 
 **Key points:**
 - `CONFIG_TEGRA_HOST1X=n` (prevents symbol conflicts with NVIDIA's OOT host1x)

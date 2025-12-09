@@ -17,11 +17,7 @@ The `tiiuae/atf-nvidia-jetson` fork includes the necessary register preservation
 
 ## Prerequisites
 
-Ensure the environment is set up:
-```bash
-export WORKSPACE=/home/hlyytine/pkvm
-. ${WORKSPACE}/env.sh
-```
+Ensure `env.sh` is sourced (see [CLAUDE.md](../CLAUDE.md#environment-setup) for details).
 
 ## Quick Build (Recommended)
 
@@ -38,9 +34,8 @@ This builds OP-TEE, ATF, and generates the TOS partition image.
 ### Build OP-TEE
 
 ```bash
-export UEFI_STMM_PATH=${LDK_DIR}/bootloader/standalonemm_optee_t234.bin
 cd ${LDK_DIR}/source/tegra/optee-src/nv-optee
-./optee_src_build.sh -p t234
+UEFI_STMM_PATH=${LDK_DIR}/bootloader/standalonemm_optee_t234.bin ./optee_src_build.sh -p t234
 dtc -I dts -O dtb -o optee/tegra234-optee.dtb optee/tegra234-optee.dts
 ```
 
@@ -50,8 +45,7 @@ For pKVM, use the tiiuae fork with CPU suspend fixes:
 
 ```bash
 cd ${LDK_DIR}/source/tegra/optee-src/atf
-export NV_TARGET_BOARD=generic
-./nvbuild.sh
+NV_TARGET_BOARD=generic ./nvbuild.sh
 ```
 
 ### Generate TOS Partition Image

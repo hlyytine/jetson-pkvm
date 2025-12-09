@@ -110,7 +110,7 @@ These repositories contain our modifications for pKVM GPU virtualization on Tegr
 | Path | Repository | Branch | Description |
 |------|------------|--------|-------------|
 | `jetson-pkvm` | `tiiuae:jetson-pkvm` | `claude` | Workspace: scripts, docs, patches |
-| `Linux_for_Tegra/source/kernel/linux` | `tiiuae:linux` | `tegra/pkvm-mainline-6.17-smmu-backup` | pKVM kernel with SMMUv2 support |
+| `Linux_for_Tegra/source/kernel/linux` | `tiiuae:linux` | `tegra/pkvm-mainline-6.18-smmu-claude` | pKVM kernel with SMMUv2 support |
 | `Linux_for_Tegra/source/nvidia-oot` | `tiiuae:linux-nv-oot` | `rel-38-for-nvgpu-rel-36` | Platform drivers (via extend-project) |
 
 ## Repository Summary

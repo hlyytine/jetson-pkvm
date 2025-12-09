@@ -102,10 +102,8 @@ sudo ./tools/l4t_update_initrd.sh
 ## Build OP-TEE
 
 ```
-export UEFI_STMM_PATH=${LDK_DIR}/bootloader/standalonemm_optee_t234.bin
-
 cd ${LDK_DIR}/source/tegra/optee-src/nv-optee
-./optee_src_build.sh -p t234
+UEFI_STMM_PATH=${LDK_DIR}/bootloader/standalonemm_optee_t234.bin ./optee_src_build.sh -p t234
 dtc -I dts -O dtb -o optee/tegra234-optee.dtb optee/tegra234-optee.dts
 ```
 
@@ -117,8 +115,7 @@ mv atf atf.orig
 git clone -b l4t/l4t-r36.4.4-pkvm2 https://github.com/tiiuae/atf-nvidia-jetson.git atf
 
 cd ${LDK_DIR}/source/tegra/optee-src/atf
-export NV_TARGET_BOARD=generic
-./nvbuild.sh
+NV_TARGET_BOARD=generic ./nvbuild.sh
 ```
 
 ## Generate Trusted OS partition image
