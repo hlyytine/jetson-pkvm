@@ -9,3 +9,11 @@ env.sh
 # Build outputs
 Linux_for_Tegra/
 toolchain/
+
+# Autopilot runtime files
+autopilot/__pycache__/
+autopilot/requests/
+autopilot/results/
+autopilot/*.cap
+autopilot/*.log
+autopilot/joo.md
